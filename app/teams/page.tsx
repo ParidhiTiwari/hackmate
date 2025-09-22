@@ -3,7 +3,18 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { collection, getDocs, addDoc, query, where, doc, updateDoc, arrayUnion, documentId } from "firebase/firestore"
+import {
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  doc,
+  updateDoc,
+  arrayUnion,
+  documentId,
+  setDoc,
+} from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
@@ -71,21 +82,40 @@ export default function TeamsPage() {
 
     try {
       const teamsRef = collection(db, "teams")
-      const q = query(teamsRef, where("members", "array-contains", user.uid))
-      const querySnapshot = await getDocs(q)
+
+      // Get teams where user is a member
+      const userTeamsQuery = query(teamsRef, where("members", "array-contains", user.uid))
+      const userTeamsSnapshot = await getDocs(userTeamsQuery)
+
+      // Get public teams where user is not already a member
+      const publicTeamsQuery = query(teamsRef, where("isPublic", "==", true))
+      const publicTeamsSnapshot = await getDocs(publicTeamsQuery)
 
       const teamsData: Team[] = []
       const allMemberIds = new Set<string>()
+      const userTeamIds = new Set<string>()
 
-      querySnapshot.forEach((doc) => {
+      // Add user's teams
+      userTeamsSnapshot.forEach((doc) => {
         const teamData = {
           id: doc.id,
           ...doc.data(),
         } as Team
         teamsData.push(teamData)
-
-        // Collect all unique member IDs
+        userTeamIds.add(doc.id)
         teamData.members.forEach((memberId) => allMemberIds.add(memberId))
+      })
+
+      // Add public teams that user is not already a member of
+      publicTeamsSnapshot.forEach((doc) => {
+        if (!userTeamIds.has(doc.id)) {
+          const teamData = {
+            id: doc.id,
+            ...doc.data(),
+          } as Team
+          teamsData.push(teamData)
+          teamData.members.forEach((memberId) => allMemberIds.add(memberId))
+        }
       })
 
       console.log("[v0] Loaded teams:", teamsData.length)
@@ -146,6 +176,20 @@ export default function TeamsPage() {
     setCreating(true)
 
     try {
+      console.log("[v0] Creating team for user:", user.uid)
+
+      const userRef = doc(db, "users", user.uid)
+      await setDoc(
+        userRef,
+        {
+          name: user.displayName || "Unknown User",
+          email: user.email || "",
+          photoURL: user.photoURL || "",
+          updatedAt: new Date(),
+        },
+        { merge: true },
+      )
+
       const teamData = {
         name: teamName,
         description: teamDescription,
@@ -156,7 +200,9 @@ export default function TeamsPage() {
         isPublic,
       }
 
-      await addDoc(collection(db, "teams"), teamData)
+      console.log("[v0] Adding team document")
+      const docRef = await addDoc(collection(db, "teams"), teamData)
+      console.log("[v0] Team created successfully with ID:", docRef.id)
 
       setTeamName("")
       setTeamDescription("")
@@ -166,7 +212,8 @@ export default function TeamsPage() {
       // Reload teams
       await loadTeams()
     } catch (error) {
-      console.error("Error creating team:", error)
+      console.error("[v0] Error creating team:", error)
+      alert(`Error creating team: ${error.message}. Please try again.`)
     } finally {
       setCreating(false)
     }
@@ -227,6 +274,41 @@ export default function TeamsPage() {
       setInviteMessage("Error sending invitation")
     } finally {
       setInviting(false)
+    }
+  }
+
+  const handleJoinTeam = async (team: Team) => {
+    if (!user) return
+
+    try {
+      console.log("[v0] Joining team:", team.id)
+
+      // Ensure user document exists
+      const userRef = doc(db, "users", user.uid)
+      await setDoc(
+        userRef,
+        {
+          name: user.displayName || "Unknown User",
+          email: user.email || "",
+          photoURL: user.photoURL || "",
+          updatedAt: new Date(),
+        },
+        { merge: true },
+      )
+
+      // Add user to team members
+      const teamRef = doc(db, "teams", team.id)
+      await updateDoc(teamRef, {
+        members: arrayUnion(user.uid),
+      })
+
+      console.log("[v0] Successfully joined team")
+
+      // Reload teams
+      await loadTeams()
+    } catch (error) {
+      console.error("Error joining team:", error)
+      alert(`Error joining team: ${error.message}`)
     }
   }
 
@@ -362,24 +444,33 @@ export default function TeamsPage() {
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 bg-transparent"
-                        onClick={() => {
-                          setSelectedTeam(team)
-                          setShowInviteModal(true)
-                        }}
-                      >
-                        <UserPlus className="h-3 w-3 mr-1" />
-                        Invite
-                      </Button>
-                      <Link href={`/teams/${team.id}/chat`} className="flex-1">
-                        <Button size="sm" className="w-full">
-                          <MessageSquare className="h-3 w-3 mr-1" />
-                          Chat
+                      {team.members.includes(user?.uid || "") ? (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 bg-transparent"
+                            onClick={() => {
+                              setSelectedTeam(team)
+                              setShowInviteModal(true)
+                            }}
+                          >
+                            <UserPlus className="h-3 w-3 mr-1" />
+                            Invite
+                          </Button>
+                          <Link href={`/teams/${team.id}/chat`} className="flex-1">
+                            <Button size="sm" className="w-full">
+                              <MessageSquare className="h-3 w-3 mr-1" />
+                              Chat
+                            </Button>
+                          </Link>
+                        </>
+                      ) : (
+                        <Button size="sm" className="w-full" onClick={() => handleJoinTeam(team)}>
+                          <UserPlus className="h-3 w-3 mr-1" />
+                          Join Team
                         </Button>
-                      </Link>
+                      )}
                     </div>
 
                     <div className="text-xs text-muted-foreground">

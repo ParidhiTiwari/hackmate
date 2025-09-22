@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { doc, getDoc, updateDoc } from "firebase/firestore"
+import { doc, getDoc, setDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { X, Plus, Github, Linkedin, Save } from "lucide-react"
 import Navbar from "@/components/navbar"
@@ -27,6 +27,8 @@ interface UserProfile {
   github: string
   linkedin: string
   photoURL: string
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 export default function ProfilePage() {
@@ -56,11 +58,13 @@ export default function ProfilePage() {
     if (!user) return
 
     try {
+      console.log("[v0] Loading profile for user:", user.uid)
       const userRef = doc(db, "users", user.uid)
       const userSnap = await getDoc(userRef)
 
       if (userSnap.exists()) {
         const userData = userSnap.data()
+        console.log("[v0] Profile loaded successfully")
         setProfile({
           name: userData.name || user.displayName || "",
           email: userData.email || user.email || "",
@@ -71,9 +75,35 @@ export default function ProfilePage() {
           linkedin: userData.linkedin || "",
           photoURL: userData.photoURL || user.photoURL || "",
         })
+      } else {
+        console.log("[v0] Creating new user profile")
+        const newUserData = {
+          name: user.displayName || "",
+          email: user.email || "",
+          university: "",
+          skills: [],
+          bio: "",
+          github: "",
+          linkedin: "",
+          photoURL: user.photoURL || "",
+          createdAt: new Date(),
+        }
+
+        await setDoc(userRef, newUserData)
+        setProfile({
+          name: newUserData.name,
+          email: newUserData.email,
+          university: newUserData.university,
+          skills: newUserData.skills,
+          bio: newUserData.bio,
+          github: newUserData.github,
+          linkedin: newUserData.linkedin,
+          photoURL: newUserData.photoURL,
+        })
       }
     } catch (error) {
-      console.error("Error loading profile:", error)
+      console.error("[v0] Error loading profile:", error)
+      setMessage("Error loading profile. Please check your connection and try again.")
     } finally {
       setLoading(false)
     }
@@ -86,20 +116,30 @@ export default function ProfilePage() {
     setMessage("")
 
     try {
+      console.log("[v0] Saving profile for user:", user.uid)
       const userRef = doc(db, "users", user.uid)
-      await updateDoc(userRef, {
-        name: profile.name,
-        university: profile.university,
-        skills: profile.skills,
-        bio: profile.bio,
-        github: profile.github,
-        linkedin: profile.linkedin,
-        updatedAt: new Date(),
-      })
+
+      await setDoc(
+        userRef,
+        {
+          name: profile.name,
+          email: profile.email,
+          university: profile.university,
+          skills: profile.skills,
+          bio: profile.bio,
+          github: profile.github,
+          linkedin: profile.linkedin,
+          photoURL: profile.photoURL,
+          updatedAt: new Date(),
+        },
+        { merge: true },
+      )
+
+      console.log("[v0] Profile saved successfully")
       setMessage("Profile updated successfully!")
     } catch (error) {
-      setMessage("Error updating profile. Please try again.")
-      console.error("Error updating profile:", error)
+      console.error("[v0] Error updating profile:", error)
+      setMessage(`Error updating profile: ${error.message}. Please try again.`)
     } finally {
       setSaving(false)
     }

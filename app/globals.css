@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color tokens to match DevMate design brief */
+  /* Updated color tokens to match HackMate design brief */
   --background: #ffffff;
   --foreground: #4b5563;
   --card: #f9fafb;

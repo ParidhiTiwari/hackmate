@@ -224,7 +224,7 @@ export default function TeamChatPage() {
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <h2 className="text-2xl font-bold text-foreground mb-2">Team not found</h2>
-              <p className="text-muted-foreground mb-4">You may not have access to this team.</p>
+              <p className="text-sm text-muted-foreground">You may not have access to this team.</p>
               <Link href="/teams">
                 <Button>Back to Teams</Button>
               </Link>

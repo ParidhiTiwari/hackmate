@@ -199,9 +199,9 @@ export default function AuthPage() {
         <div className="text-center mb-8">
           <Link href="/" className="flex items-center justify-center space-x-2 mb-4">
             <Code2 className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">DevMate</span>
+            <span className="text-2xl font-bold text-foreground">HackMate</span>
           </Link>
-          <h1 className="text-2xl font-bold text-foreground">Welcome to DevMate</h1>
+          <h1 className="text-2xl font-bold text-foreground">Welcome to HackMate</h1>
           <p className="text-muted-foreground mt-2">Connect with developers worldwide</p>
         </div>
 

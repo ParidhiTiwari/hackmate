@@ -29,8 +29,8 @@ export default function HomePage() {
             Connect with <span className="text-primary">Developers</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            DevMate is the platform where developers create profiles, discover teammates, and collaborate on hackathons,
-            coding events, and exciting projects.
+            HackMate is the platform where developers create profiles, discover teammates, and collaborate on
+            hackathons, coding events, and exciting projects.
           </p>
 
           {!user ? (

@@ -29,12 +29,24 @@ if (hasRealCredentials) {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   }
 
-  console.log("[v0] Initializing Firebase with config:", firebaseConfig)
+  console.log("[v0] Initializing Firebase with config:", {
+    ...firebaseConfig,
+    apiKey: firebaseConfig.apiKey?.substring(0, 10) + "...", // Hide full API key
+  })
 
   try {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
     auth = getAuth(app)
     db = getFirestore(app)
+
+    import("firebase/firestore").then(({ enableNetwork }) => {
+      if (db) {
+        enableNetwork(db).catch((error) => {
+          console.error("[v0] Firebase network enable error:", error)
+        })
+      }
+    })
+
     console.log("[v0] Firebase initialized successfully")
   } catch (error) {
     console.error("[v0] Firebase initialization error:", error)

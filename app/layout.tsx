@@ -8,7 +8,7 @@ import { AuthProvider } from "@/lib/auth-context"
 import { Suspense } from "react"
 
 export const metadata: Metadata = {
-  title: "DevMate - Connect with Developers",
+  title: "HackMate - Connect with Developers",
   description: "A platform where developers can connect, collaborate, and build together",
   generator: "v0.app",
 }
