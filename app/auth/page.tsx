@@ -87,13 +87,10 @@ export default function AuthPage() {
     }
 
     try {
-      console.log("[v0] Attempting email sign in with:", email)
       const result = await signInWithEmailAndPassword(auth, email, password)
-      console.log("[v0] Sign in successful:", result.user.uid)
       await createUserProfile(result.user)
       router.push("/profile")
     } catch (error: any) {
-      console.error("[v0] Sign in error:", error)
       let errorMessage = error.message
       if (error.code === "auth/user-not-found") {
         errorMessage = "No account found with this email. Please sign up first."
@@ -121,14 +118,11 @@ export default function AuthPage() {
     }
 
     try {
-      console.log("[v0] Attempting email sign up with:", email)
       const result = await createUserWithEmailAndPassword(auth, email, password)
-      console.log("[v0] Sign up successful:", result.user.uid)
       await updateProfile(result.user, { displayName: name })
       await createUserProfile(result.user, { name })
       router.push("/profile")
     } catch (error: any) {
-      console.error("[v0] Sign up error:", error)
       let errorMessage = error.message
       if (error.code === "auth/email-already-in-use") {
         errorMessage = "An account with this email already exists. Please sign in instead."
@@ -155,14 +149,11 @@ export default function AuthPage() {
     }
 
     try {
-      console.log("[v0] Attempting Google sign in")
       const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(auth, provider)
-      console.log("[v0] Google sign in successful:", result.user.uid)
       await createUserProfile(result.user)
       router.push("/profile")
     } catch (error: any) {
-      console.error("[v0] Google sign in error:", error)
       let errorMessage = error.message
       if (error.code === "auth/operation-not-allowed") {
         errorMessage = "Google authentication is not enabled. Please contact support."
@@ -185,14 +176,11 @@ export default function AuthPage() {
     }
 
     try {
-      console.log("[v0] Attempting GitHub sign in")
       const provider = new GithubAuthProvider()
       const result = await signInWithPopup(auth, provider)
-      console.log("[v0] GitHub sign in successful:", result.user.uid)
       await createUserProfile(result.user)
       router.push("/profile")
     } catch (error: any) {
-      console.error("[v0] GitHub sign in error:", error)
       let errorMessage = error.message
       if (error.code === "auth/operation-not-allowed") {
         errorMessage = "GitHub authentication is not enabled. Please contact support."
