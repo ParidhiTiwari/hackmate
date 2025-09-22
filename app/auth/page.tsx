@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Github, Mail, Code2, AlertTriangle } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Github, Mail, Code2, AlertTriangle, Camera, Upload } from "lucide-react"
 import Link from "next/link"
 import { hasRealCredentials, auth, db } from "@/lib/firebase"
 import {
@@ -29,18 +30,55 @@ export default function AuthPage() {
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [profilePicture, setProfilePicture] = useState<File | null>(null)
+  const [profilePicturePreview, setProfilePicturePreview] = useState<string>("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { user, isDevMode } = useAuth()
 
-  // Redirect if already authenticated
   if (user) {
     router.push("/profile")
     return null
   }
 
+  const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Profile picture must be less than 5MB")
+        return
+      }
+
+      if (!file.type.startsWith("image/")) {
+        setError("Please select a valid image file")
+        return
+      }
+
+      setProfilePicture(file)
+
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setProfilePicturePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+      setError("")
+    }
+  }
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click()
+  }
+
+  const removeProfilePicture = () => {
+    setProfilePicture(null)
+    setProfilePicturePreview("")
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const handleDemoSignIn = () => {
     setLoading(true)
-    // Simulate loading for demo
     setTimeout(() => {
       setLoading(false)
       router.push("/profile")
@@ -61,7 +99,7 @@ export default function AuthPage() {
         await setDoc(userRef, {
           name: displayName || additionalData.name || "",
           email,
-          photoURL: photoURL || "",
+          photoURL: photoURL || additionalData.photoURL || "",
           university: "",
           skills: [],
           bio: "",
@@ -119,8 +157,22 @@ export default function AuthPage() {
 
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password)
-      await updateProfile(result.user, { displayName: name })
-      await createUserProfile(result.user, { name })
+
+      let photoURL = ""
+      if (profilePicture) {
+        photoURL = profilePicturePreview
+      }
+
+      await updateProfile(result.user, {
+        displayName: name,
+        photoURL: photoURL,
+      })
+
+      await createUserProfile(result.user, {
+        name,
+        photoURL: photoURL,
+      })
+
       router.push("/profile")
     } catch (error: any) {
       let errorMessage = error.message
@@ -268,6 +320,54 @@ export default function AuthPage() {
 
               <TabsContent value="signup" className="space-y-4">
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Profile Picture (Optional)</Label>
+                    <div className="flex flex-col items-center space-y-4">
+                      <div className="relative">
+                        <Avatar className="h-20 w-20">
+                          <AvatarImage src={profilePicturePreview || "/placeholder.svg"} alt="Profile preview" />
+                          <AvatarFallback className="text-lg">
+                            {name ? name.charAt(0).toUpperCase() : <Camera className="h-8 w-8" />}
+                          </AvatarFallback>
+                        </Avatar>
+                        {profilePicturePreview && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                            onClick={removeProfilePicture}
+                          >
+                            ×
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={triggerFileInput}
+                          className="flex items-center gap-2 bg-transparent"
+                        >
+                          <Upload className="h-4 w-4" />
+                          {profilePicture ? "Change Photo" : "Upload Photo"}
+                        </Button>
+                      </div>
+
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePictureChange}
+                        className="hidden"
+                      />
+
+                      <p className="text-xs text-muted-foreground text-center">JPG, PNG or GIF. Max size 5MB.</p>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Full Name</Label>
                     <Input

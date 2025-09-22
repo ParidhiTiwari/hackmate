@@ -4,79 +4,79 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color tokens to match HackMate design brief */
+  /* Light theme with proper contrast */
   --background: #ffffff;
-  --foreground: #4b5563;
-  --card: #f9fafb;
-  --card-foreground: #4b5563;
+  --foreground: #0a0a0a;
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
   --popover: #ffffff;
-  --popover-foreground: #4b5563;
-  --primary: #0891b2;
-  --primary-foreground: #ffffff;
-  --secondary: #6366f1;
+  --popover-foreground: #0a0a0a;
+  --primary: #0ea5e9;
+  --primary-foreground: #f8fafc;
+  --secondary: #8b5cf6;
   --secondary-foreground: #ffffff;
-  --muted: #f9fafb;
-  --muted-foreground: #4b5563;
-  --accent: #6366f1;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #8b5cf6;
   --accent-foreground: #ffffff;
-  --destructive: #ea580c;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
+  --border: #e2e8f0;
   --input: #ffffff;
-  --ring: rgba(8, 145, 178, 0.5);
-  --chart-1: #6366f1;
-  --chart-2: #4b5563;
-  --chart-3: #0891b2;
-  --chart-4: #ea580c;
+  --ring: rgba(14, 165, 233, 0.5);
+  --chart-1: #8b5cf6;
+  --chart-2: #64748b;
+  --chart-3: #0ea5e9;
+  --chart-4: #ef4444;
   --chart-5: #f97316;
   --radius: 0.5rem;
-  --sidebar: #f9fafb;
-  --sidebar-foreground: #4b5563;
-  --sidebar-primary: #0891b2;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #6366f1;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a0a0a;
+  --sidebar-primary: #0ea5e9;
+  --sidebar-primary-foreground: #f8fafc;
+  --sidebar-accent: #8b5cf6;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #e5e7eb;
-  --sidebar-ring: rgba(8, 145, 178, 0.5);
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: rgba(14, 165, 233, 0.5);
 }
 
 .dark {
-  --background: #1f2937;
-  --foreground: #f9fafb;
-  --card: #374151;
-  --card-foreground: #f9fafb;
-  --popover: #374151;
-  --popover-foreground: #f9fafb;
-  --primary: #0891b2;
-  --primary-foreground: #ffffff;
-  --secondary: #6366f1;
+  /* Dark mode with black-based theme and enhanced gradient visibility */
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #111111;
+  --card-foreground: #ffffff;
+  --popover: #111111;
+  --popover-foreground: #ffffff;
+  --primary: #00d4ff;
+  --primary-foreground: #000000;
+  --secondary: #8b5cf6;
   --secondary-foreground: #ffffff;
-  --muted: #4b5563;
-  --muted-foreground: #9ca3af;
-  --accent: #6366f1;
+  --muted: #1a1a1a;
+  --muted-foreground: #a1a1aa;
+  --accent: #8b5cf6;
   --accent-foreground: #ffffff;
-  --destructive: #ea580c;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #4b5563;
-  --input: #374151;
-  --ring: rgba(8, 145, 178, 0.5);
-  --chart-1: #6366f1;
-  --chart-2: #9ca3af;
-  --chart-3: #0891b2;
-  --chart-4: #ea580c;
+  --border: #27272a;
+  --input: #111111;
+  --ring: rgba(0, 212, 255, 0.5);
+  --chart-1: #8b5cf6;
+  --chart-2: #a1a1aa;
+  --chart-3: #00d4ff;
+  --chart-4: #ef4444;
   --chart-5: #f97316;
-  --sidebar: #374151;
-  --sidebar-foreground: #f9fafb;
-  --sidebar-primary: #0891b2;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #6366f1;
+  --sidebar: #111111;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #00d4ff;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #8b5cf6;
   --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #4b5563;
-  --sidebar-ring: rgba(8, 145, 178, 0.5);
+  --sidebar-border: #27272a;
+  --sidebar-ring: rgba(0, 212, 255, 0.5);
 }
 
 @theme inline {
-  /* Updated font variables to match the new Inter and JetBrains Mono fonts */
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
   --color-background: var(--background);
@@ -117,11 +117,170 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Updated gradient animations to be subtle blue and white */
+@keyframes liquidFlow {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translate(-50%, -50%) rotate(90deg) scale(1.1);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(0.9);
+  }
+  75% {
+    transform: translate(-50%, -50%) rotate(270deg) scale(1.05);
+  }
+}
+
+@keyframes liquidPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    filter: blur(80px);
+  }
+  50% {
+    opacity: 0.6;
+    filter: blur(40px);
+  }
+}
+
+/* Added scroll-triggered animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Updated gradient to subtle blue and white for both themes */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 120vw;
+    height: 120vh;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(59, 130, 246, 0.08) 0%,
+      rgba(147, 197, 253, 0.05) 25%,
+      rgba(255, 255, 255, 0.02) 50%,
+      transparent 70%
+    );
+    transform: translate(-50%, -50%);
+    animation: liquidFlow 30s ease-in-out infinite, liquidPulse 12s ease-in-out infinite;
+    z-index: -2;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    top: 20%;
+    right: 20%;
+    width: 80vw;
+    height: 80vh;
+    background: radial-gradient(circle, rgba(147, 197, 253, 0.06) 0%, rgba(59, 130, 246, 0.04) 40%, transparent 70%);
+    animation: liquidFlow 20s ease-in-out infinite reverse, liquidPulse 8s ease-in-out infinite;
+    z-index: -1;
+    pointer-events: none;
+    filter: blur(60px);
+  }
+
+  /* Enhanced dark mode gradient with blue tones */
+  .dark body::before {
+    background: radial-gradient(
+      ellipse at center,
+      rgba(59, 130, 246, 0.12) 0%,
+      rgba(147, 197, 253, 0.08) 25%,
+      rgba(255, 255, 255, 0.03) 50%,
+      transparent 70%
+    );
+  }
+
+  .dark body::after {
+    background: radial-gradient(circle, rgba(147, 197, 253, 0.1) 0%, rgba(59, 130, 246, 0.06) 40%, transparent 70%);
+  }
+}
+
+/* Added scroll animation utility classes */
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.6s ease-out forwards;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.6s ease-out forwards;
+  }
+
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease-out;
+  }
+
+  .animate-on-scroll.in-view {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Added staggered animation delays */
+  .animate-delay-100 {
+    animation-delay: 0.1s;
+  }
+
+  .animate-delay-200 {
+    animation-delay: 0.2s;
+  }
+
+  .animate-delay-300 {
+    animation-delay: 0.3s;
+  }
+
+  .animate-delay-400 {
+    animation-delay: 0.4s;
   }
 }

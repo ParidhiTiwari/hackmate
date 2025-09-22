@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Code2, Users, User, LogOut, MessageSquare, Bell, Check, X } from "lucide-react"
+import { Code2, Users, User, LogOut, MessageSquare, Bell, Check, X, Trophy } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useState, useEffect } from "react"
 import { collection, query, where, getDocs, doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore"
 import { db } from "@/lib/firebase"
@@ -134,6 +135,15 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
+                <Link href="/hackathons">
+                  <Button variant="ghost" size="sm">
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Hackathons
+                  </Button>
+                </Link>
+
+                <ThemeToggle />
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="relative">
@@ -216,9 +226,12 @@ export default function Navbar() {
                 </DropdownMenu>
               </>
             ) : (
-              <Link href="/auth">
-                <Button>Sign In</Button>
-              </Link>
+              <>
+                <ThemeToggle />
+                <Link href="/auth">
+                  <Button>Sign In</Button>
+                </Link>
+              </>
             )}
           </div>
         </div>
