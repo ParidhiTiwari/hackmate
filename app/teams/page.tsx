@@ -408,7 +408,13 @@ export default function TeamsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {teams.map((team) => (
-                <Card key={team.id} className="hover:shadow-lg transition-shadow">
+                <Card key={team.id} className="hover:shadow-2xl transition-all hover:-translate-y-0.5 relative overflow-hidden"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(120px 80px at 0% 0%, rgba(59,130,246,0.06), transparent), radial-gradient(140px 90px at 100% 100%, rgba(124,58,237,0.05), transparent)",
+                  }}
+                >
+                  <span className="pointer-events-none absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-blue-200/15 via-transparent to-purple-200/15" />
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>

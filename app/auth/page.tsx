@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Github, Mail, Code2, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { hasRealCredentials, auth, db } from "@/lib/firebase"
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -27,6 +28,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
@@ -59,9 +61,9 @@ export default function AuthPage() {
 
       try {
         await setDoc(userRef, {
-          name: displayName || additionalData.name || "",
+          name: displayName || (additionalData as any).name || "",
           email,
-          photoURL: photoURL || "",
+          photoURL: photoURL || (additionalData as any).photoURL || "",
           university: "",
           skills: [],
           bio: "",
@@ -119,8 +121,17 @@ export default function AuthPage() {
 
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password)
-      await updateProfile(result.user, { displayName: name })
-      await createUserProfile(result.user, { name })
+      let uploadedPhotoURL = ""
+      if (photoFile && hasRealCredentials) {
+        const storage = getStorage()
+        const fileRef = ref(storage, `pfp/${result.user.uid}`)
+        await uploadBytes(fileRef, photoFile)
+        uploadedPhotoURL = await getDownloadURL(fileRef)
+        await updateProfile(result.user, { displayName: name, photoURL: uploadedPhotoURL })
+      } else {
+        await updateProfile(result.user, { displayName: name })
+      }
+      await createUserProfile(result.user, { name, photoURL: uploadedPhotoURL })
       router.push("/profile")
     } catch (error: any) {
       let errorMessage = error.message
@@ -278,6 +289,16 @@ export default function AuthPage() {
                       onChange={(e) => setName(e.target.value)}
                       required
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-photo">Profile Photo</Label>
+                    <Input
+                      id="signup-photo"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                    />
+                    <p className="text-xs text-muted-foreground">Optional. JPG/PNG, up to ~2MB.</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>

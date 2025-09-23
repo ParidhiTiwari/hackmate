@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import Navbar from "@/components/navbar"
-import { MessageSquare, Search, User } from "lucide-react"
+import { MessageSquare, Search, User, CalendarDays, ExternalLink } from "lucide-react"
 
 export default function HomePage() {
   const { user, loading } = useAuth()
@@ -64,7 +64,13 @@ export default function HomePage() {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <Card>
+          <Card className="group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden"
+            style={{
+              backgroundImage:
+                "radial-gradient(120px 80px at 0% 0%, rgba(59,130,246,0.08), transparent), radial-gradient(140px 90px at 100% 100%, rgba(59,130,246,0.06), transparent)",
+            }}
+          >
+            <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-blue-200/20 via-transparent to-blue-200/20" />
             <CardHeader>
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
                 <User className="h-6 w-6 text-primary" />
@@ -76,7 +82,13 @@ export default function HomePage() {
             </CardHeader>
           </Card>
 
-          <Card>
+          <Card className="group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden"
+            style={{
+              backgroundImage:
+                "radial-gradient(120px 80px at 0% 0%, rgba(124,58,237,0.08), transparent), radial-gradient(140px 90px at 100% 100%, rgba(124,58,237,0.06), transparent)",
+            }}
+          >
+            <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-purple-200/20 via-transparent to-purple-200/20" />
             <CardHeader>
               <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
                 <Search className="h-6 w-6 text-secondary" />
@@ -88,7 +100,13 @@ export default function HomePage() {
             </CardHeader>
           </Card>
 
-          <Card>
+          <Card className="group transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden"
+            style={{
+              backgroundImage:
+                "radial-gradient(120px 80px at 0% 0%, rgba(99,102,241,0.08), transparent), radial-gradient(140px 90px at 100% 100%, rgba(99,102,241,0.06), transparent)",
+            }}
+          >
+            <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-indigo-200/20 via-transparent to-indigo-200/20" />
             <CardHeader>
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
                 <MessageSquare className="h-6 w-6 text-accent" />
@@ -99,6 +117,20 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
           </Card>
+        </div>
+
+        {/* Upcoming Hackathons CTA */}
+        <div className="bg-card rounded-lg p-8 text-center mb-16 overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-200/10 via-transparent to-purple-200/10 pointer-events-none" />
+          <h2 className="text-3xl font-bold text-card-foreground mb-4">Upcoming Hackathons</h2>
+          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">Stay ahead and prepare with your team. Explore upcoming events and set reminders.</p>
+          <Link href="/hackathons">
+            <Button size="lg" className="text-lg px-8 py-3 group">
+              <CalendarDays className="h-5 w-5 mr-2" />
+              View Hackathons
+              <ExternalLink className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-0.5" />
+            </Button>
+          </Link>
         </div>
 
         {/* Stats Section */}
