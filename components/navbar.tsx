@@ -157,7 +157,7 @@ export default function Navbar() {
                       )}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-80" align="end">
+                  <DropdownMenuContent className="w-80 z-[9999]" align="end">
                     <div className="px-3 py-2 border-b">
                       <h3 className="font-semibold text-sm">Team Invitations</h3>
                     </div>
@@ -210,7 +210,7 @@ export default function Navbar() {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 z-50" align="end" forceMount>
+                  <DropdownMenuContent className="w-56 z-[9999]" align="end" forceMount>
                     <DropdownMenuItem asChild>
                       <Link href="/profile">
                         <User className="mr-2 h-4 w-4" />

@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app"
 import { getAuth } from "firebase/auth"
 import { getFirestore } from "firebase/firestore"
+import { getStorage } from "firebase/storage"
 
 console.log("[v0] Firebase Environment Variables Check:")
 console.log("[v0] API_KEY:", process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "✓ Present" : "✗ Missing")
@@ -18,6 +19,7 @@ console.log("[v0] Has Real Credentials:", hasRealCredentials)
 let app: any = null
 let auth: any = null
 let db: any = null
+let storage: any = null
 
 if (hasRealCredentials) {
   const firebaseConfig = {
@@ -38,6 +40,7 @@ if (hasRealCredentials) {
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
     auth = getAuth(app)
     db = getFirestore(app)
+    storage = getStorage(app)
 
     import("firebase/firestore").then(({ enableNetwork }) => {
       if (db) {
@@ -55,6 +58,6 @@ if (hasRealCredentials) {
   console.warn("🔧 Running in development mode without Firebase. Set up environment variables for full functionality.")
 }
 
-export { auth, db }
+export { auth, db, storage }
 export default app
 export { hasRealCredentials }

@@ -13,8 +13,8 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { doc, getDoc, setDoc } from "firebase/firestore"
-import { db, hasRealCredentials } from "@/lib/firebase"
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { db, hasRealCredentials, storage } from "@/lib/firebase"
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { updateProfile } from "firebase/auth"
 import { X, Plus, Github, Linkedin, Save, Upload, Camera } from "lucide-react"
 import Navbar from "@/components/navbar"
@@ -191,8 +191,7 @@ export default function ProfilePage() {
     setMessage("")
 
     try {
-      if (hasRealCredentials) {
-        const storage = getStorage()
+      if (hasRealCredentials && storage) {
         const fileRef = ref(storage, `pfp/${user.uid}`)
         await uploadBytes(fileRef, file)
         const downloadURL = await getDownloadURL(fileRef)
