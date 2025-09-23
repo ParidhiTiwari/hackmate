@@ -13,8 +13,10 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { doc, getDoc, setDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
-import { X, Plus, Github, Linkedin, Save } from "lucide-react"
+import { db, hasRealCredentials } from "@/lib/firebase"
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { updateProfile } from "firebase/auth"
+import { X, Plus, Github, Linkedin, Save, Upload, Camera } from "lucide-react"
 import Navbar from "@/components/navbar"
 import ProtectedRoute from "@/components/protected-route"
 
@@ -47,6 +49,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState("")
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -169,6 +172,60 @@ export default function ProfilePage() {
     }
   }
 
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      setMessage("Please select a valid image file")
+      return
+    }
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      setMessage("Image size should be less than 2MB")
+      return
+    }
+
+    setUploadingPhoto(true)
+    setMessage("")
+
+    try {
+      if (hasRealCredentials) {
+        const storage = getStorage()
+        const fileRef = ref(storage, `pfp/${user.uid}`)
+        await uploadBytes(fileRef, file)
+        const downloadURL = await getDownloadURL(fileRef)
+        
+        // Update Firebase Auth profile
+        await updateProfile(user, { photoURL: downloadURL })
+        
+        // Update local state
+        setProfile(prev => ({ ...prev, photoURL: downloadURL }))
+        
+        // Update Firestore
+        const userRef = doc(db, "users", user.uid)
+        await setDoc(userRef, { photoURL: downloadURL }, { merge: true })
+        
+        setMessage("Profile photo updated successfully!")
+      } else {
+        // Demo mode - just update local state with a placeholder
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const result = e.target?.result as string
+          setProfile(prev => ({ ...prev, photoURL: result }))
+          setMessage("Profile photo updated! (Demo mode)")
+        }
+        reader.readAsDataURL(file)
+      }
+    } catch (error) {
+      console.error("Error uploading photo:", error)
+      setMessage("Error uploading photo. Please try again.")
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -205,10 +262,22 @@ export default function ProfilePage() {
                   <CardDescription>How others will see your profile</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <Avatar className="h-24 w-24 mx-auto mb-4">
-                    <AvatarImage src={profile.photoURL || "/placeholder.svg"} alt={profile.name} />
-                    <AvatarFallback className="text-lg">{profile.name.charAt(0) || "U"}</AvatarFallback>
-                  </Avatar>
+                  <div className="relative inline-block">
+                    <Avatar className="h-24 w-24 mx-auto mb-4">
+                      <AvatarImage src={profile.photoURL || "/placeholder.svg"} alt={profile.name} />
+                      <AvatarFallback className="text-lg">{profile.name.charAt(0) || "U"}</AvatarFallback>
+                    </Avatar>
+                    <label className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors">
+                      <Camera className="h-4 w-4" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                        disabled={uploadingPhoto}
+                      />
+                    </label>
+                  </div>
 
                   <h3 className="text-xl font-semibold text-foreground mb-2">{profile.name || "Your Name"}</h3>
 
@@ -257,15 +326,36 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      value={profile.name}
+                      onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="photo-upload">Profile Photo</Label>
+                    <div className="flex items-center gap-4">
                       <Input
-                        id="name"
-                        value={profile.name}
-                        onChange={(e) => setProfile((prev) => ({ ...prev, name: e.target.value }))}
-                        placeholder="Enter your full name"
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        disabled={uploadingPhoto}
+                        className="flex-1"
                       />
+                      {uploadingPhoto && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                          Uploading...
+                        </div>
+                      )}
                     </div>
+                    <p className="text-xs text-muted-foreground">JPG/PNG, up to 2MB</p>
+                  </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
