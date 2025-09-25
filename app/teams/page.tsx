@@ -15,7 +15,7 @@ import {
   documentId,
   setDoc,
 } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { db, hasRealCredentials } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -71,12 +71,49 @@ export default function TeamsPage() {
 
   useEffect(() => {
     if (user) {
-      loadTeams()
+      if (hasRealCredentials && db) {
+        loadTeams()
+      } else {
+        // Demo mode - show sample teams
+        setTeams([
+          {
+            id: "demo-team-1",
+            name: "Code Warriors",
+            description: "A team of passionate developers working on innovative projects",
+            createdBy: "demo-user",
+            createdAt: new Date(),
+            members: ["demo-user"],
+            invites: [],
+            isPublic: true,
+          },
+          {
+            id: "demo-team-2", 
+            name: "Tech Innovators",
+            description: "Building the future with cutting-edge technology",
+            createdBy: "demo-user-2",
+            createdAt: new Date(),
+            members: ["demo-user-2"],
+            invites: [],
+            isPublic: true,
+          },
+          {
+            id: "demo-team-3",
+            name: "Hackathon Heroes",
+            description: "Winners of multiple hackathons, always ready for the next challenge",
+            createdBy: "demo-user-3", 
+            createdAt: new Date(),
+            members: ["demo-user-3"],
+            invites: [],
+            isPublic: true,
+          },
+        ])
+        setLoading(false)
+      }
     }
   }, [user])
 
   const loadTeams = async () => {
-    if (!user) return
+    if (!user || !hasRealCredentials || !db) return
 
     console.log("[v0] Loading teams for user:", user.uid)
 
@@ -132,6 +169,8 @@ export default function TeamsPage() {
   }
 
   const loadAllTeamMembers = async (teamsData: Team[], memberIds: string[]) => {
+    if (!hasRealCredentials || !db) return
+
     try {
       console.log("[v0] Loading members in batch:", memberIds.length)
 
@@ -176,41 +215,56 @@ export default function TeamsPage() {
     setCreating(true)
 
     try {
-      console.log("[v0] Creating team for user:", user.uid)
+      if (hasRealCredentials && db) {
+        console.log("[v0] Creating team for user:", user.uid)
 
-      const userRef = doc(db, "users", user.uid)
-      await setDoc(
-        userRef,
-        {
-          name: user.displayName || "Unknown User",
-          email: user.email || "",
-          photoURL: user.photoURL || "",
-          updatedAt: new Date(),
-        },
-        { merge: true },
-      )
+        const userRef = doc(db, "users", user.uid)
+        await setDoc(
+          userRef,
+          {
+            name: user.displayName || "Unknown User",
+            email: user.email || "",
+            photoURL: user.photoURL || "",
+            updatedAt: new Date(),
+          },
+          { merge: true },
+        )
 
-      const teamData = {
-        name: teamName,
-        description: teamDescription,
-        createdBy: user.uid,
-        createdAt: new Date(),
-        members: [user.uid],
-        invites: [],
-        isPublic,
+        const teamData = {
+          name: teamName,
+          description: teamDescription,
+          createdBy: user.uid,
+          createdAt: new Date(),
+          members: [user.uid],
+          invites: [],
+          isPublic,
+        }
+
+        console.log("[v0] Adding team document")
+        const docRef = await addDoc(collection(db, "teams"), teamData)
+        console.log("[v0] Team created successfully with ID:", docRef.id)
+
+        // Reload teams
+        await loadTeams()
+      } else {
+        // Demo mode - add team to local state
+        const newTeam: Team = {
+          id: `demo-team-${Date.now()}`,
+          name: teamName,
+          description: teamDescription,
+          createdBy: user.uid,
+          createdAt: new Date(),
+          members: [user.uid],
+          invites: [],
+          isPublic,
+        }
+        setTeams(prev => [...prev, newTeam])
       }
-
-      console.log("[v0] Adding team document")
-      const docRef = await addDoc(collection(db, "teams"), teamData)
-      console.log("[v0] Team created successfully with ID:", docRef.id)
 
       setTeamName("")
       setTeamDescription("")
       setIsPublic(true)
       setShowCreateModal(false)
-
-      // Reload teams
-      await loadTeams()
     } catch (error) {
       console.error("[v0] Error creating team:", error)
       alert(`Error creating team: ${error.message}. Please try again.`)
@@ -221,7 +275,7 @@ export default function TeamsPage() {
 
   const handleInviteUser = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedTeam || !user) return
+    if (!selectedTeam || !user || !hasRealCredentials || !db) return
 
     setInviting(true)
     setInviteMessage("")
@@ -281,31 +335,41 @@ export default function TeamsPage() {
     if (!user) return
 
     try {
-      console.log("[v0] Joining team:", team.id)
+      if (hasRealCredentials && db) {
+        console.log("[v0] Joining team:", team.id)
 
-      // Ensure user document exists
-      const userRef = doc(db, "users", user.uid)
-      await setDoc(
-        userRef,
-        {
-          name: user.displayName || "Unknown User",
-          email: user.email || "",
-          photoURL: user.photoURL || "",
-          updatedAt: new Date(),
-        },
-        { merge: true },
-      )
+        // Ensure user document exists
+        const userRef = doc(db, "users", user.uid)
+        await setDoc(
+          userRef,
+          {
+            name: user.displayName || "Unknown User",
+            email: user.email || "",
+            photoURL: user.photoURL || "",
+            updatedAt: new Date(),
+          },
+          { merge: true },
+        )
 
-      // Add user to team members
-      const teamRef = doc(db, "teams", team.id)
-      await updateDoc(teamRef, {
-        members: arrayUnion(user.uid),
-      })
+        // Add user to team members
+        const teamRef = doc(db, "teams", team.id)
+        await updateDoc(teamRef, {
+          members: arrayUnion(user.uid),
+        })
 
-      console.log("[v0] Successfully joined team")
+        console.log("[v0] Successfully joined team")
 
-      // Reload teams
-      await loadTeams()
+        // Reload teams
+        await loadTeams()
+      } else {
+        // Demo mode - update local state
+        setTeams(prev => prev.map(t => 
+          t.id === team.id 
+            ? { ...t, members: [...t.members, user.uid] }
+            : t
+        ))
+        alert("Successfully joined team! (Demo mode)")
+      }
     } catch (error) {
       console.error("Error joining team:", error)
       alert(`Error joining team: ${error.message}`)
@@ -335,6 +399,13 @@ export default function TeamsPage() {
             <div>
               <h1 className="text-3xl font-bold text-foreground">My Teams</h1>
               <p className="text-muted-foreground mt-2">Collaborate with other developers on projects and hackathons</p>
+              {!hasRealCredentials && (
+                <div className="mt-2">
+                  <Badge variant="outline" className="text-xs">
+                    Demo Mode - Sample teams shown
+                  </Badge>
+                </div>
+              )}
             </div>
 
             <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>

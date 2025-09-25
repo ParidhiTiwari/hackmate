@@ -14,7 +14,7 @@ import {
   startAfter,
   orderBy,
 } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { db, hasRealCredentials } from "@/lib/firebase"
 import { useAuth } from "@/lib/auth-context"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -74,8 +74,50 @@ export default function BrowsePage() {
 
   useEffect(() => {
     if (user) {
-      loadDevelopers(true) // true = initial load
-      loadUserTeams()
+      if (hasRealCredentials && db) {
+        loadDevelopers(true) // true = initial load
+        loadUserTeams()
+      } else {
+        // Demo mode - show sample developers
+        const sampleDevelopers: Developer[] = [
+          {
+            id: "demo-dev-1",
+            name: "Alice Johnson",
+            email: "alice@example.com",
+            university: "MIT",
+            skills: ["React", "Node.js", "Python", "Machine Learning"],
+            bio: "Full-stack developer with a passion for AI and machine learning. Love building scalable web applications.",
+            github: "alicejohnson",
+            linkedin: "alice-johnson-dev",
+            photoURL: "/placeholder-user.jpg",
+          },
+          {
+            id: "demo-dev-2",
+            name: "Bob Smith",
+            email: "bob@example.com", 
+            university: "Stanford University",
+            skills: ["JavaScript", "TypeScript", "React", "GraphQL"],
+            bio: "Frontend specialist focused on creating beautiful and performant user experiences.",
+            github: "bobsmith",
+            linkedin: "bob-smith-dev",
+            photoURL: "/placeholder-user.jpg",
+          },
+          {
+            id: "demo-dev-3",
+            name: "Carol Davis",
+            email: "carol@example.com",
+            university: "UC Berkeley",
+            skills: ["Python", "Django", "PostgreSQL", "AWS"],
+            bio: "Backend engineer with expertise in scalable systems and cloud architecture.",
+            github: "caroldavis",
+            linkedin: "carol-davis-dev",
+            photoURL: "/placeholder-user.jpg",
+          },
+        ]
+        setDevelopers(sampleDevelopers)
+        setFilteredDevelopers(sampleDevelopers)
+        setLoading(false)
+      }
     }
   }, [user])
 
@@ -85,6 +127,7 @@ export default function BrowsePage() {
 
   const loadDevelopers = async (isInitialLoad = false) => {
     if (!isInitialLoad && !hasMore) return
+    if (!hasRealCredentials || !db) return
 
     try {
       console.log("[v0] Loading developers, initial:", isInitialLoad)
@@ -155,7 +198,7 @@ export default function BrowsePage() {
   }
 
   const loadUserTeams = async () => {
-    if (!user) return
+    if (!user || !hasRealCredentials || !db) return
 
     try {
       const teamsRef = collection(db, "teams")
@@ -224,7 +267,7 @@ export default function BrowsePage() {
   }
 
   const handleSendInvite = async () => {
-    if (!selectedDeveloper || !selectedTeamId || !user) return
+    if (!selectedDeveloper || !selectedTeamId || !user || !hasRealCredentials || !db) return
 
     setInviting(true)
     setInviteMessage("")
@@ -305,6 +348,13 @@ export default function BrowsePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Browse Developers</h1>
           <p className="text-muted-foreground">Discover talented developers and find your next teammate</p>
+          {!hasRealCredentials && (
+            <div className="mt-2">
+              {/* <Badge variant="outline" className="text-xs">
+                Demo Mode - Sample developers shown
+              </Badge> */}
+            </div>
+          )}
         </div>
 
         {/* Search and Filters */}
