@@ -1,30 +1,26 @@
-# HackMate web app
+Find your perfect hackathon teammate. Built with Next.js, Tailwind CSS, and Firebase.
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+HackMate is a web app designed to connect hackathon enthusiasts. Whether you're looking for a designer, developer, or innovator, HackMate helps you find and collaborate with the right people for your next hackathon project.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/paridhi-tiwaris-projects/v0-dev-mate-web-app)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/AF4NJdLcJe4)
+🚀 Features
 
-## Overview
+User Authentication – Secure login & signup with Firebase Auth.
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+Team Matchmaking – Filter and find teammates based on skills, interests, and availability.
 
-## Deployment
+Profile Management – Showcase your skills, projects, and hackathon experience.
 
-Your project is live at:
+Real-time Updates – Powered by Firebase Firestore for instant data sync.
 
-**[https://vercel.com/paridhi-tiwaris-projects/v0-dev-mate-web-app](https://vercel.com/paridhi-tiwaris-projects/v0-dev-mate-web-app)**
+Responsive UI – Built with Tailwind CSS for a clean, modern, and mobile-friendly interface.
 
-## Build your app
+🛠️ Tech Stack
 
-Continue building your app on:
+Frontend: Next.js
+ + Tailwind CSS
 
-**[https://v0.app/chat/projects/AF4NJdLcJe4](https://v0.app/chat/projects/AF4NJdLcJe4)**
+Backend: Firebase
+ (Auth + Firestore + Hosting)
 
-## How It Works
+Deployment: Vercel / Firebase Hosting
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
